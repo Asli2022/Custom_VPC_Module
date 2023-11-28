@@ -1,3 +1,4 @@
+# Create a VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.cidr_block
   enable_dns_support   = true
@@ -7,6 +8,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+# Create public subnets
 resource "aws_subnet" "public" {
   count                   = length(var.public_subnet_cidr_blocks)
   vpc_id                  = aws_vpc.main.id
@@ -18,6 +20,8 @@ resource "aws_subnet" "public" {
   }
 }
 
+# Create private subnets
+
 resource "aws_subnet" "private" {
   count             = length(var.private_subnet_cidr_blocks)
   vpc_id            = aws_vpc.main.id
@@ -28,10 +32,12 @@ resource "aws_subnet" "private" {
   }
 }
 
+# Create internet gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 }
 
+# Create public route table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -45,24 +51,42 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Create private route table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-
-  # You can add additional routes for specific services, VPN, etc., in the private route table if needed.
 
   tags = {
     Name = "Private Route Table"
   }
 }
 
+# Create public route table association
 resource "aws_route_table_association" "public" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
+# Create private route table association
 resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
+}
+
+# Create security group for nat gateway
+resource "aws_security_group" "nat_sg" {
+  vpc_id = aws_vpc.main.id
+}
+
+# Create a NAT gateway
+resource "aws_nat_gateway" "my_nat_gateway" {
+  count         = var.create_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.my_eip.id
+  subnet_id     = aws_subnet.public[0].id
+}
+
+# Create an Elastic IP for the NAT gateway
+resource "aws_eip" "my_eip" {
+  instance = null
 }

@@ -32,3 +32,15 @@ variable "public_subnet_cidr_blocks" {
 variable "private_subnet_cidr_blocks" {
   description = "CIDR blocks for private subnets"
 }
+
+variable "create_nat_gateway" {
+  description = "Flag to determine whether to create NAT Gateways"
+  type        = bool
+  default     = false # Set to true if you want to create NAT Gateways by default
+}
+
+variable "nat_gateway_count" {
+  description = "Number of NAT Gateways to create"
+  type        = number
+  default     = 1
+}

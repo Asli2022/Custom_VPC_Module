@@ -1,5 +1,5 @@
 module "custom_vpc" {
-  source                     = "../../../"
+  source                     = "../../"
   vpc_name                   = var.vpc_name
   cidr_block                 = var.cidr_block
   availability_zones         = var.availability_zones
@@ -8,4 +8,5 @@ module "custom_vpc" {
   public_subnet_cidr_blocks  = var.public_subnet_cidr_blocks
   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
   region                     = var.region
+  nat_gateway_count          = 1
 }
